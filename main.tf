@@ -7,10 +7,6 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = "ap-south-1"
-}
-
 resource "aws_s3_bucket" "demo" {
   bucket = "uma-terraform-github-actions-demo-ap-south-1"
 }
