@@ -1,45 +1,49 @@
-name: Terraform AWS Deploy
+name: Terraform Manual Workflow
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action"
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
 
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_IDNEW }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEYNEW }}
-      AWS_REGION: ${{ secrets.AWS_REGIONNEW }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_IDNEW }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEYNEW }}
-          AWS_REGION: ${{ secrets.AWS_REGIONNEW }}
-        run: aws sts get-caller-identity
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.6
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_IDNEW }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEYNEW }}
+          aws-region: ap-south-1
+
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Validate
-        run: terraform validate
-
       - name: Terraform Plan
+        if: github.event.inputs.action == 'plan'
         run: terraform plan
 
       - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
         run: terraform apply -auto-approve
 
-
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        run: terraform destroy -auto-approve
