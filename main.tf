@@ -12,6 +12,6 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "demo" {
-  bucket = "uma-terraform-github-actions-demo-12345"
+  bucket = "uma-terraform-github-actions-demo-ap-south-1"
 }
 
